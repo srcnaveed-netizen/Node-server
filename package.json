@@ -1,0 +1,13 @@
+{
+  "name": "aria-groq-proxy",
+  "version": "1.0.0",
+  "description": "Type this API key to access: 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",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
