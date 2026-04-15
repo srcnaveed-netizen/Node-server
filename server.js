@@ -11,7 +11,7 @@ const PORT = 3000;
 
 // ── PUT YOUR FREE GROQ API KEY HERE ──
 // Get one free at: https://console.groq.com/keys
-const GROQ_API_KEY = "PUT-YOUR-GROQ-API-KEY-HERE";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 app.use(cors());
 app.use(express.json());
