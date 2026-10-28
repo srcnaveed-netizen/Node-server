@@ -31,7 +31,8 @@ app.get("/", (req, res) => {
   res.json({ status: "ARIA Groq proxy online", models: MODELS, search: "browser_search" });
 });
 
-async function askGroq(model, messages) {
+async function askGroq(model, messages, context) {
+  const system = context ? SYSTEM_PROMPT + "\n\n" + context : SYSTEM_PROMPT;
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -40,7 +41,7 @@ async function askGroq(model, messages) {
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+      messages: [{ role: "system", content: system }, ...messages],
       tools: [{ type: "browser_search" }],
       tool_choice: "auto",
       reasoning_effort: "low",
@@ -52,7 +53,9 @@ async function askGroq(model, messages) {
 }
 
 app.post("/chat", async (req, res) => {
-  const { messages } = req.body || {};
+  const { messages, context } = req.body || {};
+  // game facts and the player's stats, written by the Roblox server (never by the player)
+  const gameContext = typeof context === "string" ? context.slice(0, 6000) : "";
 
   if (!Array.isArray(messages)) {
     return res.status(400).json({ reply: "Failed: missing messages array" });
@@ -72,7 +75,7 @@ app.post("/chat", async (req, res) => {
   let lastError = "Groq error";
   try {
     for (const model of MODELS) {
-      const result = await askGroq(model, clean);
+      const result = await askGroq(model, clean, gameContext);
       if (result.ok) {
         let reply = result.data.choices?.[0]?.message?.content || "(no response)";
         reply = reply.replace(/【[^】]*】/g, "").trim(); // strip search citation markers
